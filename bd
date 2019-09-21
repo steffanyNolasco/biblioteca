@@ -1,0 +1,226 @@
+-- drop database BibliotecaOnline;
+create database BibliotecaOnline;
+use BibliotecaOnline;
+
+-- Creación de tablas, llaves primarias y llaves foráneas --
+create table Rol(
+idRol int auto_increment not null,
+nombreRol varchar (25) not null,
+estadoRol bit default 1 not null,
+constraint pk_rol primary key (idRol)
+);
+
+create table Usuario(
+idUsuario int auto_increment not null,
+idRol int not null,
+nombreUsuario varchar (20) not null,
+contrasenyaUsuario varchar (30) not null,
+estadoUsuario bit default 1 not null,
+constraint pk_usuario primary key (idUsuario),
+constraint fk_rol_usuario foreign key (idRol) references Rol (idRol) on update cascade on delete cascade
+);
+
+create table Editorial(
+idEditorial int auto_increment not null,
+nombreEditorial varchar(75) not null,
+telefonoEditorial varchar(9) not null,
+direccionEditorial varchar(200) not null,
+correoEditorial varchar (150) not null,
+estadoEditorial bit default 1 not null,
+constraint pk_editorial primary key (idEditorial)
+);
+
+create table Categoria(
+idCategoria int auto_increment not null,
+nombreCategoria varchar(50) not null,
+estadoCategoria bit default 1 not null,
+constraint pk_categoria primary key (idCategoria)
+);
+
+create table Autor(
+idAutor int auto_increment not null,
+nombreAutor varchar(30) not null,
+apellidoAutor varchar(30) not null,
+seudonimoAutor varchar(60) not null,
+nacionalidadAutor varchar(40) not null,
+estadoAutor bit default 1 not null,
+constraint pk_autor primary key (idAutor)
+);
+
+create table Libro(
+idLibro int auto_increment not null,
+nombreLibro varchar(40) not null,
+especialidadLibro varchar(40) not null,
+existenciasLibro int not null,
+numeroPaginasLibro int not null,
+anyoEdicionLibro int not null,
+precioVentaLibro double not null,
+precioPrestamoLibro double not null,
+idCategoria int not null,
+idAutor int not null,
+estadoLibro bit default 1 not null,
+constraint pk_libro primary key (idLibro),
+constraint fk_libro_categoria foreign key (idCategoria) references Categoria (idCategoria) on update cascade on delete cascade,
+constraint fk_libro_autor foreign key (idAutor) references Autor (idAutor) on update cascade on delete cascade
+);
+
+create table Empleado(
+idEmpleado int auto_increment not null,
+nombreEmpleado varchar(30) not null,
+apellidoEmpleado varchar(30) not null,
+edadEmpleado int not null,-- cambiarlo
+telefonoEmpleado varchar(9) not null,
+duiEmpleado varchar(10) not null,
+nitEmpleado varchar(17) not null,
+correoEmpleado varchar(150) not null,
+direccionEmpleado varchar(200) not null,
+estadoEmpleado bit default 1 not null,
+idUsuario int not null,
+constraint pk_empleado primary key (idEmpleado),
+constraint fk_empleado_usuario foreign key (idUsuario) references Usuario (idUsuario) on update cascade on delete cascade
+);
+
+create table Cliente(
+idCliente int auto_increment not null,
+nombreCliente varchar(30) not null,
+apellidoCliente varchar(30) not null,
+duiCliente varchar(10) not null,
+nitCliente varchar(17) not null,
+telefonoCliente varchar(9) not null,
+correoCliente varchar(150) not null,
+direccionCliente varchar(200) not null,
+idUsuario int not null,
+estadoCliente bit default 1 not null,
+constraint pk_cliente primary key (idCliente),
+constraint fk_user_cliente foreign key (idUsuario) references Usuario (idUsuario) on update cascade on delete cascade
+);
+
+create table Membresia(
+idMembresia int auto_increment not null,
+duracionMembresia int not null, -- Duración en cantidad de meses --
+nombreMembresia varchar(30) not null,
+precioMembresia double not null,
+estadoMembresia bit default 1 not null,
+constraint pk_membresia primary key (idMembresia)
+);
+
+create table TarjetaCredito(
+idTarjetaCredito int auto_increment not null,
+numeroTarjetaCredito int not null,
+entidadFinanciera varchar(40) not null,
+fechaVencimiento date not null,
+nombreBanco varchar(25) not null,
+numeroActivacion varchar(10) not null,
+idCliente int not null,
+estadoTarjeta bit default 1 not null,
+constraint pk_tarjetacredito primary key (idTarjetaCredito),
+constraint fk_tarjetaCredito_cliente foreign key (idCliente) references Cliente (idCliente) on update cascade on delete cascade
+);
+
+create table Promocion(
+idPromocion int auto_increment not null,
+nombrePromocion varchar(50) not null,
+descripcionPromocion varchar(200) not null,
+vigenciaPromocion int not null, -- duracion en dias
+fechaActivacion date,
+estadoPromocion bit default 1 not null,
+constraint pk_promocion primary key (idPromocion)
+);
+
+create table Prestamo(
+idPrestamo int auto_increment not null,
+idCliente int not null,
+codigoPrestamo varchar(6) not null,
+fechaSalida date not null,
+fechaMaxima date not null,
+horaSalida datetime not null,
+montoPrestamo double not null,
+estadoPrestamo bit default 1 not null,
+constraint pk_prestamo primary key (idPrestamo),
+constraint fk_prestamo_cliente foreign key (idCliente) references Cliente (idCliente) on update cascade on delete cascade
+);
+
+create table Devolucion(
+idDevolucion int auto_increment not null,
+idPrestamo int not null,
+fechaDevolucion date not null,
+horaDevolucion datetime not null,
+estadoDevolucion bit default 1 not null,
+constraint pk_devolucion primary key (idDevolucion),
+constraint fk_devolucion_prestamo foreign key (idPrestamo) references Prestamo (idPrestamo) on update cascade on delete cascade
+);
+
+create table Venta(
+idVenta int auto_increment not null,
+codVenta varchar(6) not null,
+fechaVenta date not null,
+idEmpleado int not null,
+montoVenta double,
+idPromocion int not null,
+idCliente int not null,
+estadoVenta bit default 1 not null,
+constraint pk_venta primary key (idVenta),
+constraint fk_venta_promocion foreign key (idPromocion) references Promocion (idPromocion) on update cascade on delete cascade,
+constraint fk_venta_cliente foreign key (idCliente) references Cliente (idCliente) on update cascade on delete cascade
+);
+
+create table PedidoLibro(
+idPedidoLibro int auto_increment not null,
+idEditorial int not null,
+idLibro int not null,
+cantidadLibro int not null,
+fechaPedidoLibro date not null,
+estadoPedidoLibro bit default 1 not null,
+constraint pk_pedidoLibro primary key (idPedidoLibro),
+constraint fk_pedidolibro_editorial foreign key (idEditorial) references Editorial (idEditorial)
+ on update cascade on delete cascade,
+constraint fk_pedidolibro_libro foreign key (idLibro) references Libro (idLibro) on update cascade on delete cascade
+);
+
+create table DetallePrestamo(
+idDetallePrestamo int auto_increment not null,
+idPrestamo int not null,
+idLibro int not null,
+cantidadDP int not null,
+estadoDetallePrestamo bit default 1 not null,
+constraint pk_detallePrestamo primary key (idDetallePrestamo),
+constraint fk_detallep_prestamo foreign key (idPrestamo) references Prestamo (idPrestamo) on update cascade on delete cascade,
+constraint fk_detallel_libro foreign key (idLibro) references Libro (idLibro) on update cascade on delete cascade
+);
+
+create table DetalleVenta(
+idDetalleVenta int auto_increment not null,
+idVenta int not null,
+idLibro int not null,
+cantidadDV int not null,
+estadoDetalleVenta bit default 1 not null,
+constraint pk_detalleVenta primary key (idDetalleVenta),
+constraint fk_detalleV_venta foreign key (idVenta) references Venta (idVenta) on update cascade on delete cascade,
+constraint fk_detalleV_libro foreign key (idLibro) references Libro (idLibro) on update cascade on delete cascade
+);
+
+create table ProcesoMembresia(
+idProcesoMembresia int auto_increment not null,
+idMembresia int not null,
+idCliente int not null,
+estadoProcesoMembresia bit default 1 not null,
+fechaInicio date not null,
+fechaFin date not null,
+constraint pk_procesoMembresia primary key (idProcesoMembresia),
+constraint fk_procesoM_cliente foreign key (idCliente) references Cliente (idCliente) on update cascade on delete cascade,
+constraint fk_procesoM_membresia foreign key (idMembresia) references Membresia (idMembresia) on update cascade on delete cascade
+);
+
+-- falta ejecutar la base
+
+INSERT INTO `bibliotecaonline`.`autor` (`nombreAutor`, `apellidoAutor`, `seudonimoAutor`, `nacionalidadAutor`) VALUES ('steffany', 'sanchez', 'teffa', 'El Salvador');
+
+INSERT INTO `bibliotecaonline`.`categoria` (`nombreCategoria`) VALUES ('Ciencia ficcion');
+INSERT INTO `bibliotecaonline`.`categoria` (`nombreCategoria`) VALUES ('matematicas');
+
+INSERT INTO `bibliotecaonline`.`libro` (`nombreLibro`, `especialidadLibro`, `existenciasLibro`, `numeroPaginasLibro`, `anyoEdicionLibro`, `precioVentaLibro`, `precioPrestamoLibro`, `idCategoria`, `idAutor`) VALUES ('prueba', 'prueba xd', '9', '1000', '2000', '10.50', '3', '1', '1');
+
+INSERT INTO `bibliotecaonline`.`editorial` (`nombreEditorial`, `telefonoEditorial`, `direccionEditorial`, `correoEditorial`) VALUES ('edit', '12345678', 'El salvador', 'prueba@prueba.com');
+
+INSERT INTO `bibliotecaonline`.`pedidolibro` (`idEditorial`, `idLibro`, `cantidadLibro`, `fechaPedidoLibro`) VALUES ('1', '1', '10', '2000-02-02');
+
